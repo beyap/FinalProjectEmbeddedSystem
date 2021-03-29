@@ -1,0 +1,12 @@
+Project Goal: Create a Pinball Game using a variety of sensors, motors, and LEDs
+Team: Ashley Bey & Gemma Fazekas
+
+The project will consist of the following components:
+- button-controlled flippers made from servo motors for moving the ball
+- sensor to detect when the ball has fallen below the flippers
+- LCD Display for displaying the player's score, as well as a "Good Luck" and "Game Over" message
+- LEDs for visual effect when the game begins and ends
+
+Possible additions:
+- additional sensors for gameplay effects
+- lights for flippers
