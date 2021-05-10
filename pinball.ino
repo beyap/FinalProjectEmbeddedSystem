@@ -29,9 +29,10 @@ unsigned long lastDebounceTime = 0;  // the last time the output pin was toggled
 unsigned long debounceDelay = 50;    // the debounce time; increase if the output flickers
 
 
-// initialize the library by associating any needed LCD interface pin
-// with the arduino pin number it is connected to
+// setup pin numbers
 const int rs = 11, en = 8, d4 = 5, d5 = 4, d6 = 3, d7 = 2;
+
+// setup lcd
 LiquidCrystal lcd(rs, en, d4, d5, d6, d7);
 
 int power = 0; // variable to store the status of the game (on == 1, off == 0)
@@ -40,20 +41,25 @@ int pos = 0;    // variable to store the servo position
 int buttonStateLeft = 0;         // variable for reading the pushbutton status
 int buttonStateRight = 0;         // variable for reading the pushbutton status
 int buttonStatePower = 0;         // variable for reading the pushbutton status
-int points = 0;
+int points = 0; // variable for tracking points
 
 void setup() {
+  //turn off all leds
   digitalWrite(ledGreen, LOW);
   digitalWrite(ledRed, LOW);
+  
   // set up the LCD's number of columns and rows:
   lcd.begin(16, 2);
   Serial.begin(9600); // Starting Serial Terminal
+  
   // initialize the pushbutton pin as an input:
   pinMode(buttonLeft, INPUT);
   pinMode(buttonRight, INPUT);
   pinMode(buttonPower, INPUT);
   pinMode(ledGreen, OUTPUT);
   pinMode(ledRed, OUTPUT);
+
+  // attach servo motors
   myservo1.attach(9);  // attaches the servo on pin 9 to the servo object
   myservo2.attach(10);  // attaches the servo on pin 10 to the servo object
   myservo1.write(90);
@@ -81,7 +87,8 @@ void loop() {
    Serial.print("cm");
    Serial.println();
    delay(100);
-  
+
+  // read the button states
   buttonStateLeft = digitalRead(buttonLeft);
   buttonStateRight = digitalRead(buttonRight);
   reading = digitalRead(buttonPower);
@@ -104,7 +111,7 @@ void loop() {
     }
   }
 
-  if (power == 1) {
+  if (power == 1) { // game is on
     if (gameIsOver == 1) {
       digitalWrite(ledGreen, LOW);
     }
@@ -119,8 +126,8 @@ void loop() {
         rightFlipper();
       }
       // check to see if the ball has fallen below the flippers
-      if (inches <= 2) {
-        gameOver();
+      if (inches <= 0.5) {
+        gameOver(); // game over
       }
       else {
         lcd.clear();
@@ -132,7 +139,7 @@ void loop() {
     }
   }
 
-  else {
+  else { // game is off
     digitalWrite(ledGreen, LOW);
     digitalWrite(ledRed, LOW);
     lcd.clear();
@@ -142,27 +149,33 @@ void loop() {
 }
 
 void leftFlipper() {
-  for (pos = 30; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myservo1.write(180);              // tell servo to go to position in variable 'pos'
-    delay(5);                       // waits 5ms for the servo to reach the position
+   // Move the flipper up
+  for (pos = 30; pos >= 0; pos -= 1) {
+    myservo1.write(180);
+    delay(5);
   }
-  for (pos = 0; pos <= 30; pos += 1) { // goes from 0 degrees to 180 degrees
+  
+   // Move the flipper down
+  for (pos = 0; pos <= 30; pos += 1) {
     // in steps of 1 degree
-    myservo1.write(0);              // tell servo to go to position in variable 'pos'
-    delay(5);                       // waits 5ms for the servo to reach the position
+    myservo1.write(0);
+    delay(5);
   }
   myservo1.write(90);
 }
 
 void rightFlipper() {
-  for (pos = 0; pos <= 30; pos += 1) { // goes from 0 degrees to 180 degrees
+   // Move the flipper up
+  for (pos = 0; pos <= 30; pos += 1) {
     // in steps of 1 degree
-    myservo2.write(0);              // tell servo to go to position in variable 'pos'
-    delay(5);                       // waits 5ms for the servo to reach the position
+    myservo2.write(0);
+    delay(5);
   }
-  for (pos = 30; pos >= 0; pos -= 1) { // goes from 180 degrees to 0 degrees
-    myservo2.write(180);              // tell servo to go to position in variable 'pos'
-    delay(5);                       // waits 5ms for the servo to reach the position
+
+   // Move the flipper down
+  for (pos = 30; pos >= 0; pos -= 1) {
+    myservo2.write(180);
+    delay(5);
   }
   myservo2.write(90);
 }
@@ -176,19 +189,28 @@ void gameOver() {
   lcd.setCursor(0, 1);
   lcd.print("Points: ");
   lcd.setCursor(8, 1);
-  lcd.print(points);
+  lcd.print(points); // display the points
+
+  // Indicate the game status with the LEDs
   digitalWrite(ledGreen, LOW);
   digitalWrite(ledRed, HIGH);
 }
 
+
+// This function is from a tutorial by TutorialsPoint.com
+// https://www.tutorialspoint.com/arduino/arduino_ultrasonic_sensor.htm#:~:text=Advertisements,or%201%E2%80%9D%20to%2013%20feet.
 long microsecondsToInches(long microseconds) {
    return microseconds / 74 / 2;
 }
 
+// This function is from a tutorial by TutorialsPoint.com
+// https://www.tutorialspoint.com/arduino/arduino_ultrasonic_sensor.htm#:~:text=Advertisements,or%201%E2%80%9D%20to%2013%20feet.
 long microsecondsToCentimeters(long microseconds) {
    return microseconds / 29 / 2;
 }
 
+// This function was created by referencing the Arduino debounce tutorial
+// https://www.arduino.cc/en/Tutorial/BuiltInExamples/Debounce
 void debounce() {
   // check to see if you just pressed the button
   // (i.e. the input went from LOW to HIGH), and you've waited long enough
